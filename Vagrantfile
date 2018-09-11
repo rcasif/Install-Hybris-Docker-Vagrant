@@ -1,8 +1,26 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+  Vagrant.configure("2") do |config|
+ 
+  config.vm.box = "centos/7"
 
-   $script1 = <<-SCRIPT
+  config.vm.provider "virtualbox" do |vb|
+      vb.name = "hybris-vagrant-vm"
+      vb.memory = "4096" 
+  end 
+
+  config.vm.network :private_network, ip: '192.168.17.27'  
+  #Open Hybris's default ports 9001 and 9002
+  config.vm.network "forwarded_port", guest: 9001, host: 9001, host_ip: "localhost"
+  config.vm.network "forwarded_port", guest: 9002, host: 9002, host_ip: "localhost" 
+  
+  config.ssh.forward_agent = true
+
+  #set up the synch folder between the host and the guest
+  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+
+     $script1 = <<-SCRIPT
 		
 		echo "Installing docker.."
 		yum install wget -y
@@ -35,32 +53,13 @@
 			docker pull rcasif/hybrisb2c:v1
 
 			echo "Run Hybris container.."
-			docker run -itd -p 9001:9001 -p 9002:9002 -p 8983:8983 -p 3306:3306 rcasif/hybris:v1
+			docker run -itd -p 9001:9001 -p 9002:9002 -p 8983:8983 -p 3306:3306 rcasif/hybrisb2c:v1
 	  
 	  SCRIPT
-
-  Vagrant.configure("2") do |config|
- 
-  config.vm.box = "centos/7"
-
-  config.vm.provider "virtualbox" do |vb|
-      vb.name = "hybris-vagrant-vm"
-      vb.memory = "4096" 
-  end 
-
-  config.vm.network :private_network, ip: '192.168.17.27'  
-  #Open Hybris's default ports 9001 and 9002
-  config.vm.network "forwarded_port", guest: 9001, host: 9001, host_ip: "localhost"
-  config.vm.network "forwarded_port", guest: 9002, host: 9002, host_ip: "localhost" 
   
-  config.ssh.forward_agent = true
-
-  #set up the synch folder between the host and the guest
-  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
-
-	#The primary shell script that installs SAP Hybris and its dependencies
-  config.vm.provision "shell", path: $script1, privileged: false 
-  config.vm.provision "shell", path: $script2, privileged: false 
+  #The primary shell script that installs SAP Hybris and its dependencies
+  config.vm.provision "shell", inline: $script1, privileged: false 
+  config.vm.provision "shell", inline: $script2, privileged: false 
   
 
   config.vm.post_up_message = "
