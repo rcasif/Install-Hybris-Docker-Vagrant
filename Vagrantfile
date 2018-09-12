@@ -58,8 +58,8 @@
 	  SCRIPT
   
   #The primary shell script that installs SAP Hybris and its dependencies
-  config.vm.provision "shell", inline: $script1, privileged: false 
-  config.vm.provision "shell", inline: $script2, privileged: false 
+  config.vm.provision "shell", inline: $script1, privileged: true 
+  config.vm.provision "shell", inline: $script2, privileged: true 
   
 
   config.vm.post_up_message = "
